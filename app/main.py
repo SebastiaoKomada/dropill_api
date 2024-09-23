@@ -19,7 +19,7 @@ from websocket.websocket_manager import websocket_endpoint, send_websocket_notif
 
 logging.basicConfig(level=logging.INFO)
 
-cred = credentials.Certificate('app/credencial.json')
+cred = credentials.Certificate('credencial.json')
 firebase_admin.initialize_app(cred)
 
 app = FastAPI()
