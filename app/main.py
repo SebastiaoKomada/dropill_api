@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from fastapi.websockets import WebSocketState
 from app.db.database import engine
@@ -19,7 +20,30 @@ from websocket.websocket_manager import websocket_endpoint, send_websocket_notif
 
 logging.basicConfig(level=logging.INFO)
 
-cred = credentials.Certificate('credencial.json')
+from dotenv import load_dotenv
+load_dotenv()
+
+# Configuração a partir das variáveis de ambiente
+firebase_config = {
+    "type": "service_account",
+    "project_id": os.getenv('FIREBASE_PROJECT_ID'),
+    "private_key_id": os.getenv('FIREBASE_PRIVATE_KEY_ID'),
+    "private_key": os.getenv('FIREBASE_PRIVATE_KEY').replace('\\n', '\n') if os.getenv('FIREBASE_PRIVATE_KEY') else None,
+    "client_email": os.getenv('FIREBASE_CLIENT_EMAIL'),
+    "client_id": os.getenv('FIREBASE_CLIENT_ID'),
+    "auth_uri": os.getenv('FIREBASE_AUTH_URI'),
+    "token_uri": os.getenv('FIREBASE_TOKEN_URI'),
+    "auth_provider_x509_cert_url": os.getenv('FIREBASE_AUTH_PROVIDER_X509_CERT_URL'),
+    "client_x509_cert_url": os.getenv('FIREBASE_CLIENT_X509_CERT_URL'),
+}
+
+# Verifica se todas as variáveis necessárias estão definidas
+for key, value in firebase_config.items():
+    if value is None:
+        raise ValueError(f"A variável de ambiente {key} não está definida.")
+
+# Inicializa o Firebase usando o dicionário de configuração
+cred = credentials.Certificate(firebase_config)
 firebase_admin.initialize_app(cred)
 
 app = FastAPI()
@@ -47,7 +71,7 @@ def get_db():
         db.close()
 
 async def periodic_task():
-    websocket_url = "ws://192.168.3.13:8000/ws"
+    websocket_url = "ws://172.20.10.11:8000/ws"
     while True:
         # Recupera o global_user_id do cache
         global_user_id = await cache.get("global_user_id")

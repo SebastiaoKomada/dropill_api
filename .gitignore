@@ -178,3 +178,4 @@ pyrightconfig.json
 # Ignorar arquivos sensíveis
 firebase_config.py
 credencial.json
+.vercel
